@@ -1,18 +1,11 @@
 package src;
 
+import java.awt.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.List;
 
 public class LibraryGUI extends JFrame {
-    private User currentUser;
-
-    private JTextField usernameField;
-    private JPasswordField passwordField;
-    private JButton loginButton;
-
     private JTextField searchField;
     private JButton searchButton;
     private JTable booksTable;
@@ -21,6 +14,12 @@ public class LibraryGUI extends JFrame {
     private JButton issueButton;
     private JButton returnButton;
     private JLabel statusLabel;
+
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JButton loginButton;
+
+    private Student currentUser;
 
     public LibraryGUI() {
         setTitle("Library Management System");
@@ -71,15 +70,23 @@ public class LibraryGUI extends JFrame {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
 
-        User user = UserAuthentication.authenticate(username, password);
-        if (user != null) {
-            currentUser = user;
-            getContentPane().removeAll();
-            initMainPanel();
-            revalidate();
-            repaint();
+        if (username.equals("admin") && password.equals("adminpass")) {
+            // Open Admin Portal
+            AdminGUI adminGUI = new AdminGUI();
+            adminGUI.setVisible(true);
+            dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            Student student = StudentManager.authenticate(username, password);
+            if (student != null) {
+                // Open Student Portal
+                currentUser = student;
+                getContentPane().removeAll();
+                initMainPanel();
+                revalidate();
+                repaint();
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -106,7 +113,7 @@ public class LibraryGUI extends JFrame {
         JPanel bottomPanel = new JPanel();
         issueButton = new JButton("Issue Book");
         returnButton = new JButton("Return Book");
-        statusLabel = new JLabel("Welcome, " + currentUser.getFullName());
+        statusLabel = new JLabel("Welcome, Guest");
 
         bottomPanel.add(issueButton);
         bottomPanel.add(returnButton);
@@ -124,6 +131,7 @@ public class LibraryGUI extends JFrame {
     private void searchBooks() {
         String keyword = searchField.getText();
         List<Book> books = BookManager.searchBooks(keyword);
+        System.out.println("Search results for keyword '" + keyword + "': " + books); // Debug statement
         booksTableModel.setRowCount(0);
         for (Book book : books) {
             booksTableModel.addRow(new Object[]{
@@ -144,7 +152,7 @@ public class LibraryGUI extends JFrame {
             return;
         }
         int bookId = (int) booksTableModel.getValueAt(selectedRow, 0);
-        boolean success = BookManager.issueBook(currentUser.getUserId(), bookId);
+        boolean success = BookManager.issueBook(currentUser.getId(), bookId);
         if (success) {
             JOptionPane.showMessageDialog(this, "Book issued successfully.");
             searchBooks();
@@ -160,7 +168,7 @@ public class LibraryGUI extends JFrame {
             return;
         }
         int bookId = (int) booksTableModel.getValueAt(selectedRow, 0);
-        boolean success = BookManager.returnBook(currentUser.getUserId(), bookId);
+        boolean success = BookManager.returnBook(currentUser.getId(), bookId);
         if (success) {
             JOptionPane.showMessageDialog(this, "Book returned successfully.");
             searchBooks();

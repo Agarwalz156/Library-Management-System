@@ -7,6 +7,7 @@ public class Book {
     private String isbn;
     private int totalCopies;
     private int availableCopies;
+    private String department;
 
     public Book(int bookId, String title, String author, String isbn, int totalCopies, int availableCopies) {
         this.bookId = bookId;
@@ -39,5 +40,9 @@ public class Book {
 
     public int getAvailableCopies() {
         return availableCopies;
+    }
+
+    public String getDepartment() {
+        return department;
     }
 }

@@ -1,36 +1,63 @@
--- Database schema for Library Management System
+DROP TABLE IF EXISTS issued_books;
+DROP TABLE IF EXISTS books;
+DROP TABLE IF EXISTS students;
+DROP TABLE IF EXISTS departments;
 
 CREATE DATABASE IF NOT EXISTS library_db;
 USE library_db;
-
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    role ENUM('student', 'staff') DEFAULT 'student'
+CREATE TABLE departments (
+    department_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
 );
-
--- Books table
-CREATE TABLE IF NOT EXISTS books (
+CREATE TABLE books (
     book_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    author VARCHAR(255) NOT NULL,
-    isbn VARCHAR(20) UNIQUE NOT NULL,
-    total_copies INT DEFAULT 1,
-    available_copies INT DEFAULT 1
+    author VARCHAR(100) NOT NULL,
+    isbn VARCHAR(20) NOT NULL UNIQUE,
+    available_copies INT NOT NULL,
+    department_id INT NOT NULL,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id)
 );
-
--- Transactions table (book issue and return)
-CREATE TABLE IF NOT EXISTS transactions (
-    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+CREATE TABLE students (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL
+);
+CREATE TABLE issued_books (
+    issue_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
     book_id INT NOT NULL,
     issue_date DATE NOT NULL,
-    due_date DATE NOT NULL,
     return_date DATE,
-    fine_paid DECIMAL(5,2) DEFAULT 0.00,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
     FOREIGN KEY (book_id) REFERENCES books(book_id)
 );
+INSERT INTO departments (name) VALUES
+('Computer Science'),
+('Mathematics'),
+('Physics'),
+('Chemistry'),
+('Biology'),
+('Electrical Engineering'),
+('Mechanical Engineering'),
+('Civil Engineering'),
+('Business Administration'),
+('Literature');
+INSERT INTO students (username, password, full_name) VALUES
+('student1', 'password1', 'Student One'),
+('student2', 'password2', 'Student Two');
+
+INSERT INTO books (title, author, isbn, available_copies, department_id) VALUES
+('Introduction to Algorithms', 'Thomas H. Cormen', '9780262033848', 5, 1),
+('Clean Code', 'Robert C. Martin', '9780132350884', 3, 1),
+('Design Patterns', 'Erich Gamma', '9780201633610', 2, 1),
+('Artificial Intelligence: A Modern Approach', 'Stuart Russell', '9780136042594', 4, 1),
+('Database System Concepts', 'Abraham Silberschatz', '9780073523323', 6, 1),
+('Linear Algebra Done Right', 'Sheldon Axler', '9783319110790', 5, 2),
+('Calculus', 'James Stewart', '9781285740621', 4, 2),
+('Physics for Scientists and Engineers', 'Raymond A. Serway', '9781133947271', 5, 3),
+('Organic Chemistry', 'Paula Yurkanis Bruice', '9780134042282', 3, 4),
+('Biology', 'Neil A. Campbell', '9780321775658', 4, 5);
+
+

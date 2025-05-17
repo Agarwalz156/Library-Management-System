@@ -36,6 +36,24 @@ public class BookManager {
         return books;
     }
 
+    public static boolean addBook(String title, String author, String isbn, int totalCopies, int departmentId) {
+        String sql = "INSERT INTO books (title, author, isbn, total_copies, available_copies, department_id) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, title);
+            stmt.setString(2, author);
+            stmt.setString(3, isbn);
+            stmt.setInt(4, totalCopies);
+            stmt.setInt(5, totalCopies); // available copies initially same as total
+            stmt.setInt(6, departmentId);
+            int rowsInserted = stmt.executeUpdate();
+            return rowsInserted > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static boolean issueBook(int userId, int bookId) {
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
@@ -119,5 +137,50 @@ public class BookManager {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static List<Book> getBooksByDepartment(int departmentId) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books WHERE department_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, departmentId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                books.add(new Book(
+                        rs.getInt("book_id"),
+                        rs.getString("title"),
+                        rs.getString("author"),
+                        rs.getString("isbn"),
+                        rs.getInt("available_copies"),
+                        rs.getInt("department_id")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public static List<Book> getAllBooks() {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                books.add(new Book(
+                        rs.getInt("book_id"),
+                        rs.getString("title"),
+                        rs.getString("author"),
+                        rs.getString("isbn"),
+                        rs.getInt("available_copies"),
+                        rs.getInt("department_id")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
     }
 }
