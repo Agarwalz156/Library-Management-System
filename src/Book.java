@@ -9,13 +9,14 @@ public class Book {
     private int availableCopies;
     private String department;
 
-    public Book(int bookId, String title, String author, String isbn, int totalCopies, int availableCopies) {
+    public Book(int bookId, String title, String author, String isbn, int totalCopies, int availableCopies, String department) {
         this.bookId = bookId;
         this.title = title;
         this.author = author;
         this.isbn = isbn;
         this.totalCopies = totalCopies;
         this.availableCopies = availableCopies;
+        this.department = department;
     }
 
     public int getBookId() {

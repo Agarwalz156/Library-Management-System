@@ -12,7 +12,7 @@ public class BookManager {
 
     public static List<Book> searchBooks(String keyword) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM books WHERE title LIKE ? OR author LIKE ? OR isbn LIKE ?";
+        String sql = "SELECT b.*, d.name AS department_name FROM books b JOIN departments d ON b.department_id = d.department_id WHERE b.title LIKE ? OR b.author LIKE ? OR b.isbn LIKE ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             String likeKeyword = "%" + keyword + "%";
@@ -27,11 +27,12 @@ public class BookManager {
                         rs.getString("author"),
                         rs.getString("isbn"),
                         rs.getInt("total_copies"),
-                        rs.getInt("available_copies")
+                        rs.getInt("available_copies"),
+                        rs.getString("department_name")
                 ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("SQL Exception in searchBooks: " + e.getMessage());
         }
         return books;
     }
@@ -49,7 +50,7 @@ public class BookManager {
             int rowsInserted = stmt.executeUpdate();
             return rowsInserted > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("SQL Exception in addBook: " + e.getMessage());
         }
         return false;
     }
@@ -90,7 +91,7 @@ public class BookManager {
             conn.commit();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("SQL Exception in issueBook: " + e.getMessage());
         }
         return false;
     }
@@ -134,14 +135,14 @@ public class BookManager {
                 return false; // No active transaction found
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("SQL Exception in returnBook: " + e.getMessage());
         }
         return false;
     }
 
     public static List<Book> getBooksByDepartment(int departmentId) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM books WHERE department_id = ?";
+        String sql = "SELECT b.*, d.name AS department_name FROM books b JOIN departments d ON b.department_id = d.department_id WHERE b.department_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, departmentId);
@@ -152,19 +153,20 @@ public class BookManager {
                         rs.getString("title"),
                         rs.getString("author"),
                         rs.getString("isbn"),
+                        rs.getInt("total_copies"),
                         rs.getInt("available_copies"),
-                        rs.getInt("department_id")
+                        rs.getString("department_name")
                 ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("SQL Exception in getBooksByDepartment: " + e.getMessage());
         }
         return books;
     }
 
     public static List<Book> getAllBooks() {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM books";
+        String sql = "SELECT b.*, d.name AS department_name FROM books b JOIN departments d ON b.department_id = d.department_id";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -174,12 +176,13 @@ public class BookManager {
                         rs.getString("title"),
                         rs.getString("author"),
                         rs.getString("isbn"),
+                        rs.getInt("total_copies"),
                         rs.getInt("available_copies"),
-                        rs.getInt("department_id")
+                        rs.getString("department_name")
                 ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("SQL Exception in getAllBooks: " + e.getMessage());
         }
         return books;
     }
